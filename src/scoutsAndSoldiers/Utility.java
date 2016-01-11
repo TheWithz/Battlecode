@@ -1,6 +1,4 @@
-package team184;
-
-import java.util.ArrayList;
+package scoutsAndSoldiers;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -48,18 +46,7 @@ public class Utility {
 		}
 		return lowestRobot;
 	}
-	
-	public static MapLocation closestLocation(ArrayList<MapLocation> locations, MapLocation location){
-		int minDistance = 100000;
-		MapLocation lowest = null;
-		for(MapLocation loc : locations){
-			if(loc.distanceSquaredTo(location) < minDistance){
-				minDistance = loc.distanceSquaredTo(location);
-				lowest = loc;
-			}
-		}
-		return lowest;
-	}
+
 
 	public static RobotInfo closest(RobotInfo[] robots, MapLocation location) {
 		int minDistance = 100000;

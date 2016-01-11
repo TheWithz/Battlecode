@@ -8,11 +8,11 @@ public class ArchonRobot extends BaseRobot{
 	private RobotType[] buildRobotTypes = {
 			RobotType.SCOUT, 
 			RobotType.SOLDIER, RobotType.SOLDIER, RobotType.SOLDIER,
-            RobotType.GUARD, RobotType.GUARD,
-            RobotType.TURRET, RobotType.TURRET
-            };
-            
-    int heiarchy = -1;
+			RobotType.GUARD, RobotType.GUARD,
+			RobotType.TURRET, RobotType.TURRET
+	};
+
+	int heiarchy = -1;
 	public ArchonRobot(RobotController rc){
 		super(rc);
 	}
@@ -29,16 +29,18 @@ public class ArchonRobot extends BaseRobot{
 				if(signal.getMessage() != null){
 					MessageSignal msgSig= new MessageSignal(signal);
 					switch(msgSig.getMessageType()){
-						case ROBOT:
-							if(msgSig.getPingedTeam() == Team.NEUTRAL){
-								destination = msgSig.getPingedLocation();
-								neutralBotLocations.add(destination);
-								foundSomething = true;
-							}
-							break;
-						case PARTS:
+					case ROBOT:
+						if(msgSig.getPingedTeam() == Team.NEUTRAL){
 							destination = msgSig.getPingedLocation();
+							neutralBotLocations.add(destination);
 							foundSomething = true;
+						}
+						break;
+					case PARTS:
+						destination = msgSig.getPingedLocation();
+						foundSomething = true;
+					default:
+						break;
 					}
 				}
 			}
@@ -72,10 +74,45 @@ public class ArchonRobot extends BaseRobot{
 	}
 
 	@Override
-	public void run() {
-		
+	public void run() throws GameActionException {
+
 		getSignals();
-		
+
+		//try to heal nearby robots
+		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(2, myTeam);
+		RobotInfo friendWithLowestHP = Utility.getRobotWithLowestHP(nearbyAllies);
+		if(rc.isCoreReady() && friendWithLowestHP != null){
+			try {
+				if(friendWithLowestHP.type != RobotType.ARCHON){
+					rc.repair(friendWithLowestHP.location);
+				}
+			} catch (GameActionException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+
+		//try to convert neutral bots
+		MapLocation closestNeutral = findClosestNeutralBot();
+		if (closestNeutral != null) {
+		rc.setIndicatorString(2, "Finding Neutal");
+			if (rc.isCoreReady()) {
+				if (rc.getLocation().distanceSquaredTo(closestNeutral) < 2) {
+					rc.activate(closestNeutral);
+					neutralBotLocations.remove(closestNeutral);
+					rc.broadcastSignal(0);
+				} else if (rc.canMove(rc.getLocation().directionTo(closestNeutral))) {
+					try {
+						rc.move(rc.getLocation().directionTo(closestNeutral));
+						rc.broadcastSignal(2);
+					} catch (GameActionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
+			}
+		}
+
 		//try to build a robot
 		RobotType robot = buildRobotTypes[(random.nextInt(buildRobotTypes.length))];
 		for(Direction d : Direction.values()){
@@ -92,44 +129,9 @@ public class ArchonRobot extends BaseRobot{
 			}
 		}
 
-		//try to convert neutral bots
-		MapLocation closestNeutral = findClosestNeutralBot();
-		if (closestNeutral != null) {
-			if (rc.isCoreReady()) {
-				if (rc.canSenseLocation(closestNeutral)) {
-					try {
-						rc.activate(closestNeutral);
-						neutralBotLocations.remove(closestNeutral);
-						rc.broadcastSignal(0);
-					} catch (GameActionException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				} else if (rc.canMove(closestNeutral.directionTo(closestNeutral))) {
-					try {
-						rc.move(closestNeutral.directionTo(closestNeutral));
-						rc.broadcastSignal(2);
-					} catch (GameActionException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-				}
-			}
-		}
 
-		//try to heal nearby robots
-		RobotInfo[] nearbyAllies = rc.senseNearbyRobots(2, myTeam);
-		RobotInfo friendWithLowestHP = Utility.getRobotWithLowestHP(nearbyAllies);
-		if(rc.isCoreReady() && friendWithLowestHP != null){
-			try {
-				if(friendWithLowestHP.type != RobotType.ARCHON){
-					rc.repair(friendWithLowestHP.location);
-				}
-			} catch (GameActionException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
+
+
 		RobotInfo[] enemies = rc.senseHostileRobots(rc.getLocation(), RobotType.ARCHON.sensorRadiusSquared);
 		if(enemies.length > 0){
 			try {
@@ -147,16 +149,15 @@ public class ArchonRobot extends BaseRobot{
 	}
 
 	private MapLocation findClosestNeutralBot() {
-		MapLocation closest = neutralBotLocations.get(neutralBotLocations.size() - 1);
-		for (int i = neutralBotLocations.size(); i >= 0; i--) {
-			if (distanceToArchon(closest) < distanceToArchon(neutralBotLocations.get(i))) {
+		int minDistance = 100000;
+		MapLocation closest = null;
+		for (int i = neutralBotLocations.size()-1; i >= 0; i--) {
+			if (minDistance > rc.getLocation().distanceSquaredTo(neutralBotLocations.get(i))) {
 				closest = neutralBotLocations.get(i);
+				minDistance = rc.getLocation().distanceSquaredTo(neutralBotLocations.get(i));
 			}
 		}
 		return closest;
 	}
 
-	private double distanceToArchon(MapLocation loc) {
-		return Math.sqrt(Math.pow(rc.getLocation().x + loc.x, 2) + Math.pow(rc.getLocation().y + loc.y, 2));
-	}
 }
