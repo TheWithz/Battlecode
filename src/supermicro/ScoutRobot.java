@@ -69,8 +69,6 @@ public class ScoutRobot extends BaseRobot {
 		}
 	}
 
-
-	
 	private void lookForPartsCache(){
 		int senseRadius = (int) Math.sqrt(rc.getType().sensorRadiusSquared);
 		MapLocation myLocation = rc.getLocation();
