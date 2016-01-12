@@ -15,13 +15,9 @@ public class ScoutRobot extends BaseRobot {
 	private Set<RobotInfo> sentRobots;
 	private int distanceToNearestArchon = 100;
 	private Set<MapLocation> sentPartsCaches;
+	private Set<Direction> sentMapEdges;
 	private Direction d;
-	private enum BehaviorState{
-		LOOK_FOR_CORNERS,
-		RETREAT,
-		FIND_ENEMY
-	}
-
+	
 	public void initialize(){
 		d = randomDirection();
 	}
@@ -37,12 +33,9 @@ public class ScoutRobot extends BaseRobot {
 			if(sentRobots.contains(ri) || ri.type != RobotType.ZOMBIEDEN){
 				continue;
 			}
-			MessageSignal neutralSignal = new MessageSignal(rc);
-			neutralSignal.setMessageType(MessageSignal.MessageType.ROBOT);
-			neutralSignal.setPingedLocation(rc.getLocation().x-ri.location.x, rc.getLocation().y-ri.location.y);
-			neutralSignal.setPingedTeam(Team.ZOMBIE);
-			neutralSignal.setPingedType(ri.type);
-			if(neutralSignal.send(distanceToNearestArchon*distanceToNearestArchon)){
+			MessageSignal zombieSignal = new MessageSignal(rc);
+			zombieSignal.setRobot(ri.location, Team.ZOMBIE, ri.type);
+			if(zombieSignal.send(distanceToNearestArchon*distanceToNearestArchon)){
 				sentRobots.add(ri);
 			}
 		}
@@ -55,10 +48,7 @@ public class ScoutRobot extends BaseRobot {
 				continue;
 			}
 			MessageSignal neutralSignal = new MessageSignal(rc);
-			neutralSignal.setMessageType(MessageSignal.MessageType.ROBOT);
-			neutralSignal.setPingedLocation(rc.getLocation().x-ri.location.x, rc.getLocation().y-ri.location.y);
-			neutralSignal.setPingedTeam(Team.NEUTRAL);
-			neutralSignal.setPingedType(ri.type);
+			neutralSignal.setRobot(ri.location, Team.NEUTRAL, ri.type);
 			if(neutralSignal.send(distanceToNearestArchon*distanceToNearestArchon)){
 				sentRobots.add(ri);
 			}
@@ -66,20 +56,22 @@ public class ScoutRobot extends BaseRobot {
 	}
 
 	private void lookForPartsCache() throws GameActionException{
+		MapLocation[] partCaches = rc.sensePartLocations(rc.getType().sensorRadiusSquared);
+		for(MapLocation ml : partCaches){
+			if(rc.senseParts(ml) >= 100 && !sentPartsCaches.contains(ml)){
+				MessageSignal partsSignal = new MessageSignal(rc);
+				partsSignal.setParts(ml, rc.senseParts(ml));
+				if(partsSignal.send(distanceToNearestArchon*distanceToNearestArchon)){
+					sentPartsCaches.add(ml);
+				}
+			}
+		}
 		int senseRadius = (int) Math.sqrt(rc.getType().sensorRadiusSquared);
 		MapLocation myLocation = rc.getLocation();
 		for(int dx = -senseRadius; dx <= senseRadius; dx++){
 			for(int dy = -senseRadius; dy <= senseRadius; dy++){
 				if(rc.canSenseLocation(myLocation.add(dx, dy)) && !sentPartsCaches.contains(myLocation.add(dx, dy))){
-					if(rc.senseParts(myLocation.add(dx, dy)) > 0){
-						MessageSignal partsSignal = new MessageSignal(rc);
-						partsSignal.setMessageType(MessageSignal.MessageType.PARTS);
-						partsSignal.setPingedLocation(dx, dy);
-						partsSignal.setPingedParts((int)rc.senseParts(myLocation.add(dx, dy)));
-						if(partsSignal.send(distanceToNearestArchon*distanceToNearestArchon)){
-							sentPartsCaches.add(myLocation.add(dx, dy));
-						}
-					}
+					
 				}
 			}
 		}
@@ -97,7 +89,22 @@ public class ScoutRobot extends BaseRobot {
 			}
 		}
 		else{
-			d.rotateLeft();
+			d = d.rotateLeft();
+		}
+		for(Direction d : Direction.values()){
+			if(d.isDiagonal() || sentMapEdges.contains(d)) continue;
+
+			int n = 7;
+			if(!rc.onTheMap(rc.getLocation().add(d, n))){
+				MessageSignal ms = new MessageSignal(rc);
+				MapLocation edge = rc.getLocation().add(d, n);
+				while(rc.onTheMap(rc.getLocation().add(d, --n))){
+					edge = rc.getLocation().add(d, n);
+				}
+				ms.setMapEdge(edge, d);
+				ms.send(distanceToNearestArchon);
+				sentMapEdges.add(d);
+			}
 		}
 	}
 }
