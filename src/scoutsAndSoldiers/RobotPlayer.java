@@ -36,7 +36,6 @@ public class RobotPlayer {
 		try {
 			br.startLoop();
 		} catch (GameActionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     }

@@ -112,7 +112,6 @@ public class ArchonRobot extends BaseRobot{
 				try {
 					rc.move(rc.getLocation().directionTo(closestNeutral));
 				} catch (GameActionException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

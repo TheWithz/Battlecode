@@ -68,7 +68,6 @@ public class ArchonRobot extends BaseRobot{
 				}
 			}
 		} catch (GameActionException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
@@ -87,7 +86,6 @@ public class ArchonRobot extends BaseRobot{
 					rc.repair(friendWithLowestHP.location);
 				}
 			} catch (GameActionException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -106,7 +104,6 @@ public class ArchonRobot extends BaseRobot{
 						rc.move(rc.getLocation().directionTo(closestNeutral));
 						rc.broadcastSignal(2);
 					} catch (GameActionException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -122,7 +119,6 @@ public class ArchonRobot extends BaseRobot{
 						rc.build(d, robot);
 						rc.broadcastSignal(2);
 					} catch (GameActionException e) {
-						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
@@ -137,7 +133,6 @@ public class ArchonRobot extends BaseRobot{
 			try {
 				tryToRetreat(enemies);
 			} catch (GameActionException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
