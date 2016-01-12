@@ -1,4 +1,4 @@
-package team184;
+package vipers;
 
 import battlecode.common.*;
 
