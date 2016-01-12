@@ -57,7 +57,6 @@ public class ArchonRobot extends BaseRobot{
 	}
 
 	public void initialize() throws GameActionException{
-
 		Signal[] signals = rc.emptySignalQueue();
 		rc.broadcastSignal(30*30);
 		heiarchy = signals.length;
@@ -84,6 +83,7 @@ public class ArchonRobot extends BaseRobot{
 
 	@Override
 	public void prerun() throws GameActionException{
+
 		if(rc.getRoundNum() % 5 == 0){
 			RobotInfo[] robotsNearMe = rc.senseNearbyRobots();
 			for(RobotInfo ri : robotsNearMe){
@@ -97,9 +97,9 @@ public class ArchonRobot extends BaseRobot{
 		
 		if(heiarchy == 0 && (!sentGoal || rc.getRoundNum() - lastSentGoal > 10)){
 			MessageSignal goalDirection = new MessageSignal(rc);
-			goalDirection.setMessageType(MessageSignal.MessageType.COMMAND);
 			MapLocation goal = rc.getLocation().add(teamDirection, 4);
-			goalDirection.setPingedLocation(goal);
+			rc.setIndicatorString(0, goal.toString());
+			goalDirection.setCommand(goal, MessageSignal.CommandType.MOVE);
 			goalDirection.send(30*30);
 			sentGoal = true;
 			while(!rc.onTheMap(rc.getLocation().add(teamDirection, 4))){

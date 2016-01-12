@@ -78,7 +78,7 @@ public abstract class BaseRobot {
 				MessageSignal ms = new MessageSignal(s);
 				if(ms.getMessageType() == MessageSignal.MessageType.COMMAND){
 					teamLocation = ms.getPingedLocation();
-					if(s.getLocation().distanceSquaredTo(rc.getLocation()) < nearestArchonLocation.distanceSquaredTo(rc.getLocation())){
+					if(nearestArchonLocation == null || s.getLocation().distanceSquaredTo(rc.getLocation()) < nearestArchonLocation.distanceSquaredTo(rc.getLocation())){
 						nearestArchonLocation = s.getLocation();
 					}
 				}
@@ -114,6 +114,7 @@ public abstract class BaseRobot {
 			if (rc.canMove(d) && rc.isCoreReady()) {
 				if(teamLocation != null){
 					tryToMove(rc.getLocation().directionTo(teamLocation));
+					rc.setIndicatorString(1, teamLocation.toString());
 				}
 				else{
 					tryToMove(randomDirection());
