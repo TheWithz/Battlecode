@@ -55,7 +55,6 @@ public class SoldierRobot  extends BaseRobot {
 					d = rc.getLocation().directionTo(enemyInfo[0].location).opposite();
 				}
 			} catch (GameActionException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -79,7 +78,6 @@ public class SoldierRobot  extends BaseRobot {
 					rc.move(d);
 				}
 			} catch (GameActionException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
