@@ -19,13 +19,7 @@ public class GuardRobot extends BaseRobot {
         RobotInfo[] enemyArray = rc.senseHostileRobots(rc.getLocation(), 1000000);
 
         if (enemyArray.length > 0) {
-            RobotInfo lowHdps = enemyArray[0];
-            for (RobotInfo oneEnemy : enemyArray) {
-                // finds enemy with lowest health / dps ratio
-                if (lowHdps.health / lowHdps.attackPower > oneEnemy.health / oneEnemy.attackPower) {
-                    lowHdps = oneEnemy;
-                }
-            }
+            RobotInfo lowHdps = Utility.lowestHDPS(enemyArray);
             if (rc.isWeaponReady()) {
                 //look for adjacent enemies to attack
                 if (rc.canAttackLocation(lowHdps.location)) {
