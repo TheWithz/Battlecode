@@ -14,7 +14,6 @@ public abstract class BaseRobot {
     protected static Direction[] directions = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST,
             Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
     static int[] tryDirections = {0, -1, 1, -2, 2}; //TODO put in navigation class
-    protected Stack<Action> moves = null;
     protected static RobotController rc;
     protected Team myTeam;
     protected MapLocation teamLocation;
@@ -24,8 +23,8 @@ public abstract class BaseRobot {
     public BaseRobot(RobotController rc) {
         BaseRobot.rc = rc;
         myTeam = rc.getTeam();
-        moves = new Stack<Action>();
         random = new Random(rc.getID());
+        int birth = rc.getRoundNum();
     }
 
     public void initialize() throws GameActionException {
@@ -69,6 +68,8 @@ public abstract class BaseRobot {
                     if (nearestArchonLocation == null || s.getLocation().distanceSquaredTo(rc.getLocation()) < nearestArchonLocation.distanceSquaredTo(rc.getLocation())) {
                         nearestArchonLocation = s.getLocation();
                     }
+                    if (rc.getType() != RobotType.ARCHON)
+                        teamLocation = s.getLocation().add(nearestArchonLocation.directionTo(rc.getLocation()), 5);
                 }
             }
         }
@@ -85,16 +86,27 @@ public abstract class BaseRobot {
      */
     protected void defaultBehavior() throws GameActionException {
         RobotInfo[] ri = rc.senseHostileRobots(rc.getLocation(), rc.getType().sensorRadiusSquared);
+        RobotInfo[] attackable = rc.senseHostileRobots(rc.getLocation(), rc.getType().attackRadiusSquared);
         RobotInfo sense = Utility.closest(ri, rc.getLocation());
         if (sense != null) {
-            MapLocation l = sense.location;
-            if (rc.canAttackLocation(l) && rc.getType().canAttack() && rc.isWeaponReady()) {
-                rc.attackLocation(l);
+            if (rc.isWeaponReady()) {
+                double lowestHealth = 99999;
+                RobotInfo bestTarget = null;
+                for (RobotInfo enemy : attackable) {
+                    if (!enemy.type.canAttack() && bestTarget != null) {
+                        continue;
+                    }
+                    if (rc.canAttackLocation(enemy.location) && rc.getType().canAttack() && enemy.health * enemy.attackPower / (enemy.weaponDelay) < lowestHealth) {
+                        lowestHealth = enemy.health * enemy.attackPower / (enemy.weaponDelay);
+                        bestTarget = enemy;
+                    }
+                }
+                if (bestTarget != null) {
+                    rc.attackLocation(bestTarget.location);
+                }
             } else {
-                if (moves.isEmpty() && rc.getType().canMove()) {
-                    moves = bestPathTo(l, rc);
-                } else if (rc.isCoreReady()) {
-                    move(moves.pop(), rc);
+                if (rc.isCoreReady()) {
+                    BugNav.goTo(sense.location);
                 }
             }
         } else {
@@ -198,6 +210,7 @@ public abstract class BaseRobot {
                         front.add(toAdd);
                     }
                 } catch (GameActionException e) {
+                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
