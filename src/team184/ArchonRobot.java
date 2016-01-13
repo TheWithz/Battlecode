@@ -25,6 +25,8 @@ public class ArchonRobot extends BaseRobot {
     private ArrayList<MapLocation> neutralBotLocations = new ArrayList<MapLocation>();
     private int lastSentGoal;
     private boolean[] mapEdgesFound = new boolean[8];
+    private boolean foundEnemyArchon;
+    private MapLocation enemyArchon;
     private int[] mapEdges = new int[8];
 
     public void getSignals() {
@@ -38,6 +40,12 @@ public class ArchonRobot extends BaseRobot {
                             if (msgSig.getPingedTeam() == Team.NEUTRAL) {
                                 rc.setIndicatorString(0, "Found neutral");
                                 destination = msgSig.getPingedLocation();
+                            }
+                            if (msgSig.getPingedType() == RobotType.ARCHON && msgSig.getPingedTeam() == myTeam.opponent()) {
+                                rc.setIndicatorString(0, "Found enemy Archon");
+                                foundEnemyArchon = true;
+                                sentGoal = false;
+                                enemyArchon = msgSig.getPingedLocation();
                             }
                             break;
                         case PARTS:
@@ -72,6 +80,7 @@ public class ArchonRobot extends BaseRobot {
         }
     }
 
+    @Override
     public void initialize() throws GameActionException {
         Signal[] signals = rc.emptySignalQueue();
         rc.broadcastSignal(30 * 30);
@@ -90,10 +99,17 @@ public class ArchonRobot extends BaseRobot {
                     if (s.getMessage()[0] == 1337) {
                         leaderId = s.getID();
                         teamDirection = Direction.values()[s.getMessage()[1]];
+
                         leaderLocation = s.getLocation();
                         teamLocation = s.getLocation().add(teamDirection);
                     }
                 }
+            }
+            if (teamDirection == null) {
+                teamDirection = Direction.EAST;
+                teamLocation = rc.getLocation().add(teamDirection);
+                rc.broadcastMessageSignal(1337, teamDirection.ordinal(), 50 * 50);
+                leaderId = rc.getID();
             }
         }
     }
@@ -120,8 +136,12 @@ public class ArchonRobot extends BaseRobot {
             if (mapEdgesFound[teamDirection.ordinal()]) {
 
             }
-            MapLocation goal = rc.getLocation().add(teamDirection, 4);
-            rc.setIndicatorString(0, goal.toString());
+            MapLocation goal;
+            if (foundEnemyArchon) {
+                goal = enemyArchon;
+            } else {
+                goal = rc.getLocation().add(teamDirection, 4);
+            }
             goalDirection.setCommand(goal, MessageSignal.CommandType.MOVE);
             goalDirection.send(30 * 30);
             sentGoal = true;

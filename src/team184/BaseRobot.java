@@ -11,6 +11,7 @@ import java.util.*;
  *
  */
 public abstract class BaseRobot {
+
     protected static Direction[] directions = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST,
             Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
     static int[] tryDirections = {0, -1, 1, -2, 2}; //TODO put in navigation class
@@ -68,7 +69,7 @@ public abstract class BaseRobot {
                     if (nearestArchonLocation == null || s.getLocation().distanceSquaredTo(rc.getLocation()) < nearestArchonLocation.distanceSquaredTo(rc.getLocation())) {
                         nearestArchonLocation = s.getLocation();
                     }
-                    if (rc.getType() != RobotType.ARCHON)
+                    if (rc.getType() != RobotType.ARCHON && rc.getRoundNum() < 75)
                         teamLocation = s.getLocation().add(nearestArchonLocation.directionTo(rc.getLocation()), 5);
                 }
             }
@@ -113,7 +114,7 @@ public abstract class BaseRobot {
             Direction d = directions[random.nextInt(8)];
             if (rc.canMove(d) && rc.isCoreReady()) {
                 if (teamLocation != null) {
-                    tryToMove(rc.getLocation().directionTo(teamLocation));
+                    BugNav.goTo(teamLocation);
                     rc.setIndicatorString(1, teamLocation.toString());
                 } else {
                     tryToMove(randomDirection());
@@ -210,7 +211,6 @@ public abstract class BaseRobot {
                         front.add(toAdd);
                     }
                 } catch (GameActionException e) {
-                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }
