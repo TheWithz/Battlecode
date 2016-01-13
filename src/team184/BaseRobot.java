@@ -5,10 +5,10 @@ import battlecode.common.*;
 import java.util.*;
 
 /*Base Robot class for implementing the types of robots
- * Begins with the startLoop method, which should not exit 
- * 
- * 
- * 
+ * Begins with the startLoop method, which should not exit
+ *
+ *
+ *
  */
 public abstract class BaseRobot {
     protected static Direction[] directions = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST,
@@ -90,14 +90,14 @@ public abstract class BaseRobot {
         RobotInfo sense = Utility.closest(ri, rc.getLocation());
         if (sense != null) {
             if (rc.isWeaponReady()) {
-                double lowestHealth = 99999;
+                double lowestHealth_dps = 99999;
                 RobotInfo bestTarget = null;
                 for (RobotInfo enemy : attackable) {
                     if (!enemy.type.canAttack() && bestTarget != null) {
                         continue;
                     }
-                    if (rc.canAttackLocation(enemy.location) && rc.getType().canAttack() && enemy.health * enemy.attackPower / (enemy.weaponDelay) < lowestHealth) {
-                        lowestHealth = enemy.health * enemy.attackPower / (enemy.weaponDelay);
+                    if (rc.canAttackLocation(enemy.location) && rc.getType().canAttack() && enemy.health / (enemy.attackPower - 0.1) * (enemy.weaponDelay) < lowestHealth_dps) {
+                        lowestHealth_dps = enemy.health / (enemy.attackPower - 0.1) * (enemy.weaponDelay);
                         bestTarget = enemy;
                     }
                 }
