@@ -1,4 +1,4 @@
-package team184;
+package teamGoal;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -25,17 +25,12 @@ public class GuardRobot extends BaseRobot {
 		if(enemyArray.length>0){
 			if(rc.isWeaponReady()){
 				//look for adjacent enemies to attack
-				RobotInfo bestTarget = null;
-				double lowestHP = 99999;
 				for(RobotInfo oneEnemy:enemyArray){
-					if(rc.canAttackLocation(oneEnemy.location) && oneEnemy.health < lowestHP){
-						bestTarget = oneEnemy;
-						lowestHP = oneEnemy.health;
+					if(rc.canAttackLocation(oneEnemy.location)){
+						rc.setIndicatorString(0,"trying to attack");
+						rc.attackLocation(oneEnemy.location);
+						break;
 					}
-				}
-				if(bestTarget != null){
-					rc.setIndicatorString(0,"trying to attack");
-					rc.attackLocation(bestTarget.location);
 				}
 			}
 			//could not find any enemies adjacent to attack

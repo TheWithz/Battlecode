@@ -1,8 +1,15 @@
-package team184;
-
-import battlecode.common.*;
+package swarm;
 
 import java.util.ArrayList;
+
+import battlecode.common.Direction;
+import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
+import battlecode.common.RobotController;
+import battlecode.common.RobotInfo;
+import battlecode.common.RobotType;
+import battlecode.common.Signal;
+import battlecode.common.Team;
 
 public class ArchonRobot extends BaseRobot{
 	private RobotType[] buildRobotTypes = {
@@ -22,10 +29,8 @@ public class ArchonRobot extends BaseRobot{
 	private Direction teamDirection;
 	private ArrayList<MapLocation> neutralBotLocations = new ArrayList<MapLocation>();
 	private int lastSentGoal;
-	private boolean[] mapEdgesFound = new boolean[8];
-	private boolean foundEnemyArchon;
-	private MapLocation enemyArchon;
-	private int[] mapEdges = new int[8];
+	private boolean[][] mapEdgesFound = new boolean[3][3];
+	private int[][] mapEdges = new int[3][3];
 
 	public void getSignals(){
 		Signal[] queue = rc.emptySignalQueue();
@@ -39,12 +44,6 @@ public class ArchonRobot extends BaseRobot{
 							rc.setIndicatorString(0,  "Found neutral");
 							destination = msgSig.getPingedLocation();
 						}
-						if(msgSig.getPingedType() == RobotType.ARCHON && msgSig.getPingedTeam() == myTeam.opponent()){
-							rc.setIndicatorString(0, "Found enemy Archon");
-							foundEnemyArchon = true;
-							sentGoal = false;
-							enemyArchon = msgSig.getPingedLocation();
-						}
 						break;
 					case PARTS:
 						destination = msgSig.getPingedLocation();
@@ -52,22 +51,21 @@ public class ArchonRobot extends BaseRobot{
 					case MAP_EDGE:
 						Direction edge = msgSig.getPingedDirection();
 						MapLocation ml = msgSig.getPingedLocation();
-						int loc = edge.ordinal();
 						if(edge == Direction.EAST){
-							mapEdgesFound[loc] = true;
-							mapEdges[loc] = ml.x;
+							mapEdgesFound[2][1] = true;
+							mapEdges[2][1] = ml.x;
 						}
 						if(edge == Direction.NORTH){
-							mapEdgesFound[loc] = true;
-							mapEdges[loc] = ml.y;
+							mapEdgesFound[1][0] = true;
+							mapEdges[1][0] = ml.y;
 						}
 						if(edge == Direction.SOUTH){
-							mapEdgesFound[loc] = true;
-							mapEdges[loc] = ml.y;
+							mapEdgesFound[1][2] = true;
+							mapEdges[1][2] = ml.y;
 						}
 						if(edge == Direction.WEST){
-							mapEdgesFound[loc] = true;
-							mapEdges[loc] = ml.x;
+							mapEdgesFound[0][1] = true;
+							mapEdges[0][1] = ml.x;
 						}
 						break;
 					default:
@@ -80,6 +78,7 @@ public class ArchonRobot extends BaseRobot{
 
 	@Override
 	public void initialize() throws GameActionException{
+		
 		Signal[] signals = rc.emptySignalQueue();
 		rc.broadcastSignal(30*30);
 		heiarchy = signals.length;
@@ -95,21 +94,20 @@ public class ArchonRobot extends BaseRobot{
 			heiarchy-=1;
 			for(Signal s : signals){
 				if(s.getMessage() != null){
-					if(s.getMessage()[0] == 1337){
+					if(s.getMessage()[0] == 1337 && s.getTeam() == myTeam){
 						leaderId = s.getID();
 						teamDirection = Direction.values()[s.getMessage()[1]];
-						
 						leaderLocation = s.getLocation();
 						teamLocation = s.getLocation().add(teamDirection);
 					}
 				}
 			}
-			if(teamDirection == null){
-				teamDirection = Direction.EAST;
-				teamLocation = rc.getLocation().add(teamDirection);
-				rc.broadcastMessageSignal(1337, teamDirection.ordinal(), 50*50);
-				leaderId = rc.getID();
-			}
+		}
+		if(teamDirection == null){
+			teamDirection = Direction.EAST;
+			teamLocation = rc.getLocation().add(teamDirection);
+			rc.broadcastMessageSignal(1337, teamDirection.ordinal(), 50*50);
+			leaderId = rc.getID();
 		}
 	}
 
@@ -132,16 +130,8 @@ public class ArchonRobot extends BaseRobot{
 				teamDirection = randomDirection();
 			}
 			MessageSignal goalDirection = new MessageSignal(rc);
-			if(mapEdgesFound[teamDirection.ordinal()]){
-				
-			}
-			MapLocation goal;
-			if(foundEnemyArchon){
-				goal = enemyArchon;
-			}
-			else{
-				goal = rc.getLocation().add(teamDirection, 4);
-			}
+			MapLocation goal = rc.getLocation().add(teamDirection, 4);
+			rc.setIndicatorString(0, goal.toString());
 			goalDirection.setCommand(goal, MessageSignal.CommandType.MOVE);
 			goalDirection.send(30*30);
 			sentGoal = true;

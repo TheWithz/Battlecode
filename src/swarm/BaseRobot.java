@@ -1,4 +1,4 @@
-package team184;
+package swarm;
 
 import java.util.HashSet;
 import java.util.PriorityQueue;
@@ -52,7 +52,7 @@ public abstract class BaseRobot {
 		initialize();
 
 		while(true){
-
+			
 			try {
 				prerun();
 				run();
@@ -60,7 +60,7 @@ public abstract class BaseRobot {
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
-
+			
 		}
 	}
 
@@ -80,7 +80,7 @@ public abstract class BaseRobot {
 					if(nearestArchonLocation == null || s.getLocation().distanceSquaredTo(rc.getLocation()) < nearestArchonLocation.distanceSquaredTo(rc.getLocation())){
 						nearestArchonLocation = s.getLocation();
 					}
-					if(rc.getType() != RobotType.ARCHON && rc.getRoundNum() < 75)
+						if(rc.getType() != RobotType.ARCHON)
 						teamLocation = s.getLocation().add(nearestArchonLocation.directionTo(rc.getLocation()), 5);
 				}
 			}
@@ -102,14 +102,14 @@ public abstract class BaseRobot {
 		RobotInfo sense = Utility.closest(ri, rc.getLocation());
 		if (sense != null) {
 			if(rc.isWeaponReady()){
-				double lowestHealth_dps = 99999;
+				double lowestHealth = 99999;
 				RobotInfo bestTarget = null;
 				for(RobotInfo enemy : attackable){
 					if(!enemy.type.canAttack() && bestTarget != null){
 						continue;
 					}
-					if (rc.canAttackLocation(enemy.location) && rc.getType().canAttack() && enemy.health/(enemy.attackPower-0.1)*(enemy.weaponDelay) < lowestHealth_dps) {
-						lowestHealth_dps = enemy.health/(enemy.attackPower-0.1)*(enemy.weaponDelay);
+					if (rc.canAttackLocation(enemy.location) && rc.getType().canAttack() && enemy.health*enemy.attackPower/(enemy.weaponDelay) < lowestHealth) {
+						lowestHealth = enemy.health*enemy.attackPower/(enemy.weaponDelay);
 						bestTarget = enemy;
 					}
 				}
@@ -125,7 +125,7 @@ public abstract class BaseRobot {
 			Direction d = directions[random.nextInt(8)];
 			if (rc.canMove(d) && rc.isCoreReady()) {
 				if(teamLocation != null){
-					BugNav.goTo(teamLocation);
+					tryToMove(rc.getLocation().directionTo(teamLocation));
 					rc.setIndicatorString(1, teamLocation.toString());
 				}
 				else{

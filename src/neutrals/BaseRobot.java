@@ -1,4 +1,4 @@
-package team184;
+package neutrals;
 
 import java.util.HashSet;
 import java.util.PriorityQueue;
@@ -14,7 +14,6 @@ import battlecode.common.MapLocation;
 import battlecode.common.RobotController;
 import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
-import battlecode.common.Signal;
 import battlecode.common.Team;
 /*Base Robot class for implementing the types of robots
  * Begins with the startLoop method, which should not exit 
@@ -26,17 +25,18 @@ public abstract class BaseRobot {
 	protected static Direction[] directions = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST,
 			Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
 	static int[] tryDirections = {0,-1,1,-2,2}; //TODO put in navigation class
-	protected static RobotController rc;
+	protected Stack<Action> moves = null;
+	protected RobotController rc;
 	protected Team myTeam;
-	protected MapLocation teamLocation;
+	protected MapLocation leaderLocation;
 	protected MapLocation nearestArchonLocation;
-	protected Random random;
+	Random random;
 
 	public BaseRobot(RobotController rc){
-		BaseRobot.rc = rc;
+		this.rc = rc;
 		myTeam = rc.getTeam();
+		moves = new Stack<Action>();
 		random = new Random(rc.getID());
-		int birth = rc.getRoundNum();
 	}
 
 	public void initialize() throws GameActionException{
@@ -52,39 +52,24 @@ public abstract class BaseRobot {
 		initialize();
 
 		while(true){
-
+			prerun();
 			try {
-				prerun();
 				run();
-				postrun();
 			} catch (GameActionException e) {
 				e.printStackTrace();
 			}
-
+			postrun();
 		}
 	}
 
-	protected void postrun() throws GameActionException{
+	private void postrun() {
 		Clock.yield();
 	}
 
 	public abstract void run() throws GameActionException;
 
-	protected void prerun() throws GameActionException{
-		Signal[] signals = rc.emptySignalQueue();
-		for(Signal s : signals){
-			if(s.getTeam() == myTeam && s.getMessage() != null){
-				MessageSignal ms = new MessageSignal(s);
-				if(ms.getMessageType() == MessageSignal.MessageType.COMMAND){
-					teamLocation = ms.getPingedLocation();
-					if(nearestArchonLocation == null || s.getLocation().distanceSquaredTo(rc.getLocation()) < nearestArchonLocation.distanceSquaredTo(rc.getLocation())){
-						nearestArchonLocation = s.getLocation();
-					}
-					if(rc.getType() != RobotType.ARCHON && rc.getRoundNum() < 75)
-						teamLocation = s.getLocation().add(nearestArchonLocation.directionTo(rc.getLocation()), 5);
-				}
-			}
-		}
+	private void prerun() {
+
 	}
 
 
@@ -98,39 +83,22 @@ public abstract class BaseRobot {
 	 */
 	protected void defaultBehavior() throws GameActionException {
 		RobotInfo[] ri = rc.senseHostileRobots(rc.getLocation(), rc.getType().sensorRadiusSquared);
-		RobotInfo[] attackable = rc.senseHostileRobots(rc.getLocation(), rc.getType().attackRadiusSquared);
 		RobotInfo sense = Utility.closest(ri, rc.getLocation());
 		if (sense != null) {
-			if(rc.isWeaponReady()){
-				double lowestHealth_dps = 99999;
-				RobotInfo bestTarget = null;
-				for(RobotInfo enemy : attackable){
-					if(!enemy.type.canAttack() && bestTarget != null){
-						continue;
-					}
-					if (rc.canAttackLocation(enemy.location) && rc.getType().canAttack() && enemy.health/(enemy.attackPower-0.1)*(enemy.weaponDelay) < lowestHealth_dps) {
-						lowestHealth_dps = enemy.health/(enemy.attackPower-0.1)*(enemy.weaponDelay);
-						bestTarget = enemy;
-					}
-				}
-				if(bestTarget != null){
-					rc.attackLocation(bestTarget.location);
-				}
+			MapLocation l = sense.location;
+			if (rc.canAttackLocation(l) && rc.getType().canAttack() && rc.isWeaponReady()) {
+				rc.attackLocation(l);
 			} else {
-				if(rc.isCoreReady()){
-					BugNav.goTo(sense.location);
+				if (moves.isEmpty() && rc.getType().canMove()) {
+					moves = bestPathTo(l, rc);
+				} else if (rc.isCoreReady()) {
+					move(moves.pop(), rc);
 				}
 			}
 		} else {
 			Direction d = directions[random.nextInt(8)];
 			if (rc.canMove(d) && rc.isCoreReady()) {
-				if(teamLocation != null){
-					BugNav.goTo(teamLocation);
-					rc.setIndicatorString(1, teamLocation.toString());
-				}
-				else{
-					tryToMove(randomDirection());
-				}
+				rc.move(d);
 			}
 		}
 	}
@@ -259,4 +227,5 @@ public abstract class BaseRobot {
 	public Direction randomDirection() {
 		return Direction.values()[(int)(random.nextDouble()*8)];
 	}
+
 }

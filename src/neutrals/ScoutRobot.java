@@ -1,4 +1,4 @@
-package team184;
+package neutrals;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,8 +15,12 @@ public class ScoutRobot extends BaseRobot {
 	private Set<RobotInfo> sentRobots;
 	private int distanceToNearestArchon = 100;
 	private Set<MapLocation> sentPartsCaches;
-	private Set<Direction> sentMapEdges;
 	private Direction d;
+	private enum BehaviorState{
+		LOOK_FOR_CORNERS,
+		RETREAT,
+		FIND_ENEMY
+	}
 
 	public void initialize(){
 		d = randomDirection();
@@ -25,21 +29,6 @@ public class ScoutRobot extends BaseRobot {
 		super(rc);
 		sentRobots = new HashSet<RobotInfo>();
 		sentPartsCaches = new HashSet<MapLocation>();
-		sentMapEdges = new HashSet<Direction>();
-	}
-	
-	private void lookForEnemyArchons() throws GameActionException{
-		RobotInfo[] enemies = rc.senseNearbyRobots(rc.getType().sensorRadiusSquared, myTeam.opponent());
-		for(RobotInfo ri : enemies){
-			if(sentRobots.contains(ri) || ri.type != RobotType.ARCHON){
-				continue;
-			}
-			MessageSignal archonSignal = new MessageSignal(rc);
-			archonSignal.setRobot(ri.location, myTeam.opponent(), ri.type);
-			if(archonSignal.send(distanceToNearestArchon*distanceToNearestArchon)){
-				//sentRobots.add(ri);
-			}
-		}
 	}
 
 	private void lookForZombieDens() throws GameActionException{
@@ -48,9 +37,12 @@ public class ScoutRobot extends BaseRobot {
 			if(sentRobots.contains(ri) || ri.type != RobotType.ZOMBIEDEN){
 				continue;
 			}
-			MessageSignal zombieSignal = new MessageSignal(rc);
-			zombieSignal.setRobot(ri.location, Team.ZOMBIE, ri.type);
-			if(zombieSignal.send(distanceToNearestArchon*distanceToNearestArchon)){
+			MessageSignal neutralSignal = new MessageSignal(rc);
+			neutralSignal.setMessageType(MessageSignal.MessageType.ROBOT);
+			neutralSignal.setPingedLocation(rc.getLocation().x-ri.location.x, rc.getLocation().y-ri.location.y);
+			neutralSignal.setPingedTeam(Team.ZOMBIE);
+			neutralSignal.setPingedType(ri.type);
+			if(neutralSignal.send(distanceToNearestArchon*distanceToNearestArchon)){
 				sentRobots.add(ri);
 			}
 		}
@@ -63,7 +55,10 @@ public class ScoutRobot extends BaseRobot {
 				continue;
 			}
 			MessageSignal neutralSignal = new MessageSignal(rc);
-			neutralSignal.setRobot(ri.location, Team.NEUTRAL, ri.type);
+			neutralSignal.setMessageType(MessageSignal.MessageType.ROBOT);
+			neutralSignal.setPingedLocation(rc.getLocation().x-ri.location.x, rc.getLocation().y-ri.location.y);
+			neutralSignal.setPingedTeam(Team.NEUTRAL);
+			neutralSignal.setPingedType(ri.type);
 			if(neutralSignal.send(distanceToNearestArchon*distanceToNearestArchon)){
 				sentRobots.add(ri);
 			}
@@ -71,22 +66,20 @@ public class ScoutRobot extends BaseRobot {
 	}
 
 	private void lookForPartsCache() throws GameActionException{
-		MapLocation[] partCaches = rc.sensePartLocations(rc.getType().sensorRadiusSquared);
-		for(MapLocation ml : partCaches){
-			if(rc.senseParts(ml) >= 100 && !sentPartsCaches.contains(ml)){
-				MessageSignal partsSignal = new MessageSignal(rc);
-				partsSignal.setParts(ml, rc.senseParts(ml));
-				if(partsSignal.send(distanceToNearestArchon*distanceToNearestArchon)){
-					sentPartsCaches.add(ml);
-				}
-			}
-		}
 		int senseRadius = (int) Math.sqrt(rc.getType().sensorRadiusSquared);
 		MapLocation myLocation = rc.getLocation();
 		for(int dx = -senseRadius; dx <= senseRadius; dx++){
 			for(int dy = -senseRadius; dy <= senseRadius; dy++){
 				if(rc.canSenseLocation(myLocation.add(dx, dy)) && !sentPartsCaches.contains(myLocation.add(dx, dy))){
-
+					if(rc.senseParts(myLocation.add(dx, dy)) > 0){
+						MessageSignal partsSignal = new MessageSignal(rc);
+						partsSignal.setMessageType(MessageSignal.MessageType.PARTS);
+						partsSignal.setPingedLocation(dx, dy);
+						partsSignal.setPingedParts((int)rc.senseParts(myLocation.add(dx, dy)));
+						if(partsSignal.send(distanceToNearestArchon*distanceToNearestArchon)){
+							sentPartsCaches.add(myLocation.add(dx, dy));
+						}
+					}
 				}
 			}
 		}
@@ -95,35 +88,16 @@ public class ScoutRobot extends BaseRobot {
 	@Override
 	public void run() throws GameActionException {
 		lookForNeutralRobots();
-		
-		if(rc.getTeamParts() < 100){
-			lookForPartsCache();
-		}
-		lookForEnemyArchons();
-		
+		lookForPartsCache();
 
 
-		if(rc.isCoreReady()){
-			tryToMove(d);
-		}
-		if(rc.getRoundNum() % 100 == 99){
-			d = randomDirection();
-		}
-		for(Direction d : Direction.values()){
-			if(d.isDiagonal() || sentMapEdges.contains(d)) continue;
-
-			int n = 7;
-			if(!rc.onTheMap(rc.getLocation().add(d, n))){
-				MessageSignal ms = new MessageSignal(rc);
-				MapLocation edge = rc.getLocation().add(d, n);
-				while(!rc.onTheMap(rc.getLocation().add(d, --n))){
-					edge = rc.getLocation().add(d, n);
-				}
-
-				ms.setMapEdge(edge, d);
-				ms.send(distanceToNearestArchon);
-				sentMapEdges.add(d);
+		if(rc.canMove(d)){
+			if(rc.isCoreReady()){
+				rc.move(d);
 			}
+		}
+		else{
+			d.rotateLeft();
 		}
 	}
 }

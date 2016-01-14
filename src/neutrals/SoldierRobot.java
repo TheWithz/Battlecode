@@ -1,4 +1,4 @@
-package team184;
+package neutrals;
 
 import battlecode.common.Direction;
 import battlecode.common.GameActionException;
@@ -11,8 +11,9 @@ import battlecode.common.Team;
 
 public class SoldierRobot  extends BaseRobot {
 	Direction d = Direction.EAST;
-	
 
+	public void inititalize(){
+	}
 	public SoldierRobot(RobotController rc){
 		super(rc);
 	}
@@ -38,9 +39,6 @@ public class SoldierRobot  extends BaseRobot {
 		boolean dig = false;
 		if(rc.isWeaponReady()){
 			RobotInfo[] enemyInfo = rc.senseHostileRobots(rc.getLocation(), rc.getType().attackRadiusSquared);
-			//RobotInfo[] zombieInfo = rc.senseNearbyRobots(rc.getType().attackRadiusSquared, Team.ZOMBIE);
-
-			//RobotInfo[] enemyInfo = Utility.combine(opponentInfo, zombieInfo);
 			if(enemyInfo.length > 0){
 				rc.attackLocation(enemyInfo[0].location);
 				d = rc.getLocation().directionTo(enemyInfo[0].location).opposite();
