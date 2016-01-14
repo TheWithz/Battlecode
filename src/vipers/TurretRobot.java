@@ -1,14 +1,8 @@
-package supermicro;
+package vipers;
+
+import battlecode.common.*;
 
 import java.util.ArrayList;
-
-import battlecode.common.Direction;
-import battlecode.common.GameActionException;
-import battlecode.common.MapLocation;
-import battlecode.common.RobotController;
-import battlecode.common.RobotInfo;
-import battlecode.common.RobotType;
-import battlecode.common.Signal;
 
 public class TurretRobot  extends BaseRobot {
 
@@ -17,7 +11,7 @@ public class TurretRobot  extends BaseRobot {
 	}
 
 	@Override
-	public void run() {
+	public void run() throws GameActionException {
 		if(rc.getType() == RobotType.TTM){
 			RobotInfo[] visibleEnemyArray = rc.senseHostileRobots(rc.getLocation(), 1000000);
 			Signal[] incomingSignals = rc.emptySignalQueue();
@@ -25,13 +19,9 @@ public class TurretRobot  extends BaseRobot {
 			for(RobotInfo ri : visibleEnemyArray){
 				attackableEnemyLocations.add(ri.location);
 			}
-			
+
 			if(attackableEnemyLocations.size()>0){
-				try {
-					rc.unpack();
-				} catch (GameActionException e) {
-					e.printStackTrace();
-				}
+				rc.unpack();
 				//could not find any enemies adjacent to attack
 				//try to move toward them
 			}else{//there are no enemies nearby
@@ -41,21 +31,13 @@ public class TurretRobot  extends BaseRobot {
 					RobotInfo[] nearbyFriends = rc.senseNearbyRobots(2, rc.getTeam());
 					if(nearbyFriends.length>3){
 						Direction away = randomDirection();
-						try {
-							tryToMove(away);
-						} catch (GameActionException e) {
-							e.printStackTrace();
-						}
+						tryToMove(away);
 					}else{//maybe a friend is in need!
 						RobotInfo[] alliesToHelp = rc.senseNearbyRobots(1000000,rc.getTeam());
 						MapLocation weakestOne = Utility.getRobotWithLowestHP(alliesToHelp).location;
 						if(weakestOne!=null){//found a friend most in need
 							Direction towardFriend = rc.getLocation().directionTo(weakestOne);
-							try {
-								tryToMove(towardFriend);
-							} catch (GameActionException e) {
-								e.printStackTrace();
-							}
+							tryToMove(towardFriend);
 						}
 					}
 				}
@@ -83,18 +65,14 @@ public class TurretRobot  extends BaseRobot {
 				}
 			}
 		}
-		
+
 		if(attackableEnemyLocations.size()>0){
 			if(rc.isWeaponReady()){
 				//look for adjacent enemies to attack
 				for(MapLocation oneEnemy:attackableEnemyLocations){
 					if(rc.canAttackLocation(oneEnemy)){
 						rc.setIndicatorString(0,"trying to attack");
-						try {
-							rc.attackLocation(oneEnemy);
-						} catch (GameActionException e) {
-							e.printStackTrace();
-						}
+						rc.attackLocation(oneEnemy);
 						break;
 					}
 				}
@@ -108,11 +86,7 @@ public class TurretRobot  extends BaseRobot {
 				RobotInfo[] nearbyFriends = rc.senseNearbyRobots(2, rc.getTeam());
 				if(nearbyFriends.length>3){
 					Direction away = randomDirection();
-					try {
-						rc.pack();
-					} catch (GameActionException e) {
-						e.printStackTrace();
-					}
+					rc.pack();
 				}
 			}
 		}

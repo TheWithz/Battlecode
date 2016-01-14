@@ -1,4 +1,4 @@
-package team184;
+package vipers;
 
 import battlecode.common.*;
 
@@ -78,5 +78,15 @@ public class Utility {
             }
         }
         return lowHdps;
+    }
+
+    public static RobotInfo findStrongest(RobotInfo[] enemyArray) {
+        RobotInfo strong = enemyArray[0];
+        for (RobotInfo info : enemyArray) {
+            if (info.attackPower >= strong.attackPower && info.maxHealth >= strong.maxHealth) {
+                strong = info;
+            }
+        }
+        return strong;
     }
 }

@@ -1,4 +1,4 @@
-package team184;
+package vipers;
 
 import battlecode.common.*;
 
@@ -17,7 +17,7 @@ public class GuardRobot extends BaseRobot {
 
     private void guardCode() throws GameActionException {
         RobotInfo[] enemyArray = rc.senseHostileRobots(rc.getLocation(), 1000000);
-        
+
         if (enemyArray.length > 0) {
             RobotInfo lowHdps = Utility.lowestHDPS(enemyArray);
             if (rc.isWeaponReady()) {

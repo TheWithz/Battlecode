@@ -1,36 +1,36 @@
-package team184;
+package vipers;
 
 import battlecode.common.*;
 
-public class GuardRobot extends BaseRobot {
+public class ViperRobot extends BaseRobot {
 
     Direction d = Direction.EAST;
 
-    public GuardRobot(RobotController rc) {
+    public ViperRobot(RobotController rc) {
         super(rc);
     }
 
     @Override
     public void run() throws GameActionException {
-        guardCode();
+        viperCode();
     }
 
-    private void guardCode() throws GameActionException {
+    private void viperCode() throws GameActionException {
         RobotInfo[] enemyArray = rc.senseHostileRobots(rc.getLocation(), 1000000);
-        
+
         if (enemyArray.length > 0) {
-            RobotInfo lowHdps = Utility.lowestHDPS(enemyArray);
+            RobotInfo strongest = Utility.findStrongest(enemyArray);
             if (rc.isWeaponReady()) {
                 //look for adjacent enemies to attack
-                if (rc.canAttackLocation(lowHdps.location)) {
+                if (rc.canAttackLocation(strongest.location)) {
                     rc.setIndicatorString(0, "trying to attack");
-                    rc.attackLocation(lowHdps.location);
+                    rc.attackLocation(strongest.location);
                 }
             }
             //could not find any enemies adjacent to attack
             //try to move toward them
             if (rc.isCoreReady()) {
-                MapLocation goal = lowHdps.location;
+                MapLocation goal = strongest.location;
                 Direction toEnemy = rc.getLocation().directionTo(goal);
                 tryToMove(toEnemy);
             }

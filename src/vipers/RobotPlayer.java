@@ -1,4 +1,4 @@
-package teamGoal;
+package vipers;
 
 import battlecode.common.GameActionException;
 import battlecode.common.RobotController;

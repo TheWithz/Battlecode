@@ -1,4 +1,4 @@
-package team184;
+package vipers;
 
 import battlecode.common.*;
 
@@ -49,24 +49,7 @@ public class MessageSignal {
 	 *   	pos 20-23: command type
 	 *   	pos 9-17: dy
 	 *   	pos 1-8: dx
-	 *   map edge:
-	 *   	pos	20-23: edge
-	 *   	pos 9-17:  dy
-	 *   	pos 1-8:   dx
 	 */
-
-    public void setMapEdge(MapLocation ml, Direction edge) {
-        setPingedLocation(ml);
-        setPingedDirection(edge);
-    }
-
-    private void setPingedDirection(Direction d) {
-        message[1] ^= d.ordinal() << 19;
-    }
-
-    public Direction getPingedDirection() {
-        return Direction.values()[message[1] >> 19 & 0xf];
-    }
 
     public MessageSignal(RobotController rc) {
         message = new int[2];
