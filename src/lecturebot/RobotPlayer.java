@@ -60,6 +60,7 @@ public class RobotPlayer {
 		rc.broadcastMessageSignal(rc.getTeam().ordinal(), movingDirection.ordinal(), 1000);
 	}
 	private static Direction randomDirection() {
+		// TODO Auto-generated method stub
 		return Direction.values()[(int)(Math.random()*8)];
 	}
 	private static void followinstructions() {

@@ -19,6 +19,7 @@ public class ArchonRobot extends BaseRobot {
                 try {
                     rc.build(dir, RobotType.SCOUT);
                 } catch (GameActionException e) {
+                    // TODO Auto-generated catch block
                     e.printStackTrace();
                 }
             }

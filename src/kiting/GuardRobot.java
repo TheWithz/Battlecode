@@ -24,6 +24,7 @@ public class GuardRobot extends BaseRobot {
 					if(enemyInfo.length > 0 && rc.canAttackLocation(enemyInfo[0].location))
 					rc.attackLocation(enemyInfo[0].location);
 				} catch (GameActionException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -35,6 +36,7 @@ public class GuardRobot extends BaseRobot {
 						if(rc.canMove(d))
 							rc.move(d);
 					} catch (GameActionException e) {
+						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}

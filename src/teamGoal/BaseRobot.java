@@ -201,6 +201,7 @@ public abstract class BaseRobot {
 						front.add(toAdd);
 					}
 				} catch (GameActionException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}

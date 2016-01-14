@@ -41,6 +41,7 @@ public class ScoutRobot extends BaseRobot {
 					sentRobots.add(ri);
 				}
 			} catch (GameActionException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -62,11 +63,14 @@ public class ScoutRobot extends BaseRobot {
 					sentRobots.add(ri);
 				}
 			} catch (GameActionException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			};
 		}
 	}
 
+
+	
 	private void lookForPartsCache(){
 		int senseRadius = (int) Math.sqrt(rc.getType().sensorRadiusSquared);
 		MapLocation myLocation = rc.getLocation();
@@ -83,6 +87,7 @@ public class ScoutRobot extends BaseRobot {
 								sentPartsCaches.add(myLocation.add(dx, dy));
 							}
 						} catch (GameActionException e) {
+							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}
@@ -102,6 +107,7 @@ public class ScoutRobot extends BaseRobot {
 				try {
 					rc.move(d);
 				} catch (GameActionException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
