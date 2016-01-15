@@ -169,7 +169,6 @@ public class BugNav extends BaseRobot{
 
 	@Override
 	public void run() throws GameActionException {
-		// TODO Auto-generated method stub
 
 	}
 }
