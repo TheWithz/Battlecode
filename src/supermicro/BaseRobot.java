@@ -36,6 +36,7 @@ public abstract class BaseRobot {
 			try {
 				run();
 			} catch (GameActionException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 			
@@ -52,7 +53,8 @@ public abstract class BaseRobot {
 	public abstract void run() throws GameActionException;
 
 	private void prerun() {
-
+		// TODO Auto-generated method stub
+		
 	}
 
 	protected void defaultBehavior() {
@@ -122,6 +124,7 @@ public abstract class BaseRobot {
 	        try {
 	            rc.clearRubble(rc.getLocation().directionTo(action.location));
 	        } catch (GameActionException e) {
+	            // TODO Auto-generated catch block
 	            e.printStackTrace();
 	        }
 	    }
@@ -130,6 +133,7 @@ public abstract class BaseRobot {
 	            if (rc.canMove(rc.getLocation().directionTo(action.location)))
 	                rc.move(rc.getLocation().directionTo(action.location));
 	        } catch (GameActionException e) {
+	            // TODO Auto-generated catch block
 	            e.printStackTrace();
 	        }
 	    }
@@ -180,6 +184,7 @@ public abstract class BaseRobot {
 	                    front.add(toAdd);
 	                }
 	            } catch (GameActionException e) {
+	                // TODO Auto-generated catch block
 	                e.printStackTrace();
 	            }
 	        }

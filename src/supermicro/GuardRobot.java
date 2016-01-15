@@ -23,6 +23,7 @@ public class GuardRobot extends BaseRobot {
 			try {
 				guardCode();
 			} catch (GameActionException e) {
+				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -78,6 +79,7 @@ public class GuardRobot extends BaseRobot {
 						rc.attackLocation(enemyInfo[0].location);
 					}
 				} catch (GameActionException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 			}
@@ -89,6 +91,7 @@ public class GuardRobot extends BaseRobot {
 						if(rc.canMove(d))
 							rc.move(d);
 					} catch (GameActionException e) {
+						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}

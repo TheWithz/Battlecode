@@ -30,6 +30,7 @@ public class TurretRobot  extends BaseRobot {
 				try {
 					rc.unpack();
 				} catch (GameActionException e) {
+					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				//could not find any enemies adjacent to attack
@@ -44,6 +45,7 @@ public class TurretRobot  extends BaseRobot {
 						try {
 							tryToMove(away);
 						} catch (GameActionException e) {
+							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 					}else{//maybe a friend is in need!
@@ -54,6 +56,7 @@ public class TurretRobot  extends BaseRobot {
 							try {
 								tryToMove(towardFriend);
 							} catch (GameActionException e) {
+								// TODO Auto-generated catch block
 								e.printStackTrace();
 							}
 						}
@@ -93,6 +96,7 @@ public class TurretRobot  extends BaseRobot {
 						try {
 							rc.attackLocation(oneEnemy);
 						} catch (GameActionException e) {
+							// TODO Auto-generated catch block
 							e.printStackTrace();
 						}
 						break;
@@ -111,6 +115,7 @@ public class TurretRobot  extends BaseRobot {
 					try {
 						rc.pack();
 					} catch (GameActionException e) {
+						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
 				}
