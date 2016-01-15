@@ -78,8 +78,7 @@ public abstract class BaseRobot {
 					if(nearestArchonLocation == null || s.getLocation().distanceSquaredTo(rc.getLocation()) < nearestArchonLocation.distanceSquaredTo(rc.getLocation())){
 						nearestArchonLocation = s.getLocation();
 					}
-					if(rc.getType() != RobotType.ARCHON && rc.getRoundNum() < 75)
-						goalLocation = s.getLocation().add(nearestArchonLocation.directionTo(rc.getLocation()), 5);
+					
 				}
 			}
 		}
@@ -157,7 +156,13 @@ public abstract class BaseRobot {
 				bestRetreatDir = dir;
 			}
 		}
-
+		if(bestRetreatDir == null){
+			for(Direction d : Direction.values()){
+				if(rc.canMove(d)){
+					bestRetreatDir = d;
+				}
+			}
+		}
 		if (bestRetreatDir != null && rc.isCoreReady()) {
 			rc.move(bestRetreatDir);
 			return true;
