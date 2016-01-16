@@ -1,3 +1,5 @@
+package team184;
+
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Random;
@@ -14,6 +16,8 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Signal;
 import battlecode.common.Team;
+import team184.MessageSignal;
+
 /*Base Robot class for implementing the types of robots
  * Begins with the startLoop method, which should not exit 
  * 
