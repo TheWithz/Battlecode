@@ -6,7 +6,6 @@ import java.util.ArrayList;
 
 public class Utility {
 
-
     public static RobotInfo[] combine(RobotInfo[] o1, RobotInfo[] o2) {
         RobotInfo[] ret = new RobotInfo[o1.length + o2.length];
         int index = 0;
@@ -20,7 +19,6 @@ public class Utility {
         }
         return ret;
     }
-
 
     //Returns whether the Direction is one of the three Directions in the relatively opposite Direction
     public static boolean oppositeish(Direction d1, Direction d2) {
@@ -69,14 +67,26 @@ public class Utility {
         return lowest;
     }
 
-    public static RobotInfo lowestHDPS(RobotInfo[] enemyArray) {
-        RobotInfo lowHdps = enemyArray[0];
-        for (RobotInfo oneEnemy : enemyArray) {
-            // finds enemy with lowest health / dps ratio
-            if (lowHdps.health / lowHdps.attackPower > oneEnemy.health / oneEnemy.attackPower) {
-                lowHdps = oneEnemy;
-            }
-        }
-        return lowHdps;
+    public static void fillRobotTypes(ArrayList<RobotType> list) {
+        list = new ArrayList<>();
+        list.add(RobotType.GUARD);
+        list.add(RobotType.GUARD);
+        list.add(RobotType.GUARD);
+        list.add(RobotType.GUARD);
+        list.add(RobotType.GUARD);
+        list.add(RobotType.GUARD);
+        list.add(RobotType.SCOUT);
+        list.add(RobotType.SCOUT);
+        list.add(RobotType.SOLDIER);
+        list.add(RobotType.SOLDIER);
+        list.add(RobotType.SOLDIER);
+        list.add(RobotType.SOLDIER);
+        list.add(RobotType.SOLDIER);
+        list.add(RobotType.SOLDIER);
+        list.add(RobotType.VIPER);
+        list.add(RobotType.VIPER);
+        list.add(RobotType.TURRET);
+        list.add(RobotType.TURRET);
     }
+
 }
