@@ -1,5 +1,3 @@
-package team184;
-
 import java.util.HashSet;
 import java.util.PriorityQueue;
 import java.util.Random;
@@ -23,20 +21,24 @@ import battlecode.common.Team;
  * 
  */
 public abstract class BaseRobot {
-	protected static Direction[] directions = {Direction.NORTH, Direction.NORTH_EAST, Direction.EAST, Direction.SOUTH_EAST,
-			Direction.SOUTH, Direction.SOUTH_WEST, Direction.WEST, Direction.NORTH_WEST};
+
 	static int[] tryDirections = {0,-1,1,-2,2}; //TODO put in navigation class
-	protected static RobotController rc;
+	public static RobotController rc;
 	protected Team myTeam;
+	protected Team otherTeam;
+	protected RobotType myType;
 	protected MapLocation goalLocation;
 	protected MapLocation nearestArchonLocation;
+	protected int birth;
 	protected Random random;
+	protected MessageSignal.CommandType currentCommandType;
 
 	public BaseRobot(RobotController rc){
 		BaseRobot.rc = rc;
 		myTeam = rc.getTeam();
+		otherTeam = myTeam.opponent();
 		random = new Random(rc.getID());
-		int birth = rc.getRoundNum();
+		birth = rc.getRoundNum();
 	}
 
 	public void initialize() throws GameActionException{
@@ -75,10 +77,11 @@ public abstract class BaseRobot {
 				MessageSignal ms = new MessageSignal(s);
 				if(ms.getMessageType() == MessageSignal.MessageType.COMMAND){
 					goalLocation = ms.getPingedLocation();
+					currentCommandType = ms.getCommandType();
 					if(nearestArchonLocation == null || s.getLocation().distanceSquaredTo(rc.getLocation()) < nearestArchonLocation.distanceSquaredTo(rc.getLocation())){
 						nearestArchonLocation = s.getLocation();
 					}
-					
+
 				}
 			}
 		}
@@ -88,9 +91,9 @@ public abstract class BaseRobot {
 	/**
 	 * Looks for attackable robot and attacks
 	 * If it cannot attack, it finds the best path and moves
-	 * 
+	 *
 	 * Otherwise, it randomly moves if no robots are in range
-	 * 
+	 *
 	 * @throws GameActionException
 	 */
 	protected void defaultBehavior() throws GameActionException {
@@ -119,13 +122,21 @@ public abstract class BaseRobot {
 				}
 			}
 		} else {
-			Direction d = directions[random.nextInt(8)];
 			if (rc.isCoreReady()) {
-				if(goalLocation != null && rc.getLocation().distanceSquaredTo(goalLocation) > rc.getType().attackRadiusSquared){
+				if(goalLocation != null){
 					BugNav.goTo(goalLocation);
 					rc.setIndicatorString(1, goalLocation.toString());
+					if(currentCommandType == MessageSignal.CommandType.MOVE && rc.getLocation().distanceSquaredTo(goalLocation) <= rc.getType().sensorRadiusSquared){
+						goalLocation = null;
+						currentCommandType = null;
+					}
+					if(currentCommandType == MessageSignal.CommandType.ATTACK && rc.getLocation().distanceSquaredTo(goalLocation) <= rc.getType().sensorRadiusSquared && rc.senseRobotAtLocation(goalLocation) == null){
+						goalLocation = null;
+						currentCommandType = null;
+					}
+
 				}
-				else if(rc.canMove(d)){
+				else{
 					tryToMove(randomDirection());
 				}
 			}
@@ -134,7 +145,7 @@ public abstract class BaseRobot {
 
 	/**
 	 * Retreats in the direction with the biggest distance from enemies
-	 * 	
+	 *
 	 * @param nearbyEnemies Array of nearby robots
 	 * @return whether the robot retreated
 	 * @throws GameActionException
@@ -164,14 +175,14 @@ public abstract class BaseRobot {
 			}
 		}
 		if (bestRetreatDir != null && rc.isCoreReady()) {
-			rc.move(bestRetreatDir);
+			tryToMove(bestRetreatDir);
 			return true;
 		}
 		return false;
 	}
 
 
-	public  int tryToMove(Direction forward) throws GameActionException{
+	public int tryToMove(Direction forward) throws GameActionException{
 		if(rc.isCoreReady()){
 			for(int deltaD:tryDirections){
 				Direction maybeForward = Direction.values()[(forward.ordinal()+deltaD+8)%8];
