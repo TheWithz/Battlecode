@@ -10,7 +10,8 @@ public class ArchonRobot extends BaseRobot {
             RobotType.SOLDIER,
             RobotType.GUARD,
     };
-    private double[] probabilities = {0.1, 0.6, 1.0};
+    private double[] probabilities = {0.0, 0.60, 1.0};
+    private double[] probabilitiesZ = {0.0, 0.4, 1.0};
 
     int heiarchy = -1;
 
@@ -47,6 +48,9 @@ public class ArchonRobot extends BaseRobot {
                         case ROBOT:
                             if (msgSig.getPingedTeam() == Team.NEUTRAL) {
                                 rc.setIndicatorString(0, "Found neutral");
+                                if (msgSig.getPingedLocation().distanceSquaredTo(rc.getLocation()) < 40) {
+                                    goalLocation = msgSig.getPingedLocation();
+                                }
                             }
                             if (msgSig.getPingedType() == RobotType.ARCHON && msgSig.getPingedTeam() == myTeam.opponent()) {
                                 rc.setIndicatorString(0, "Found enemy Archon");
@@ -197,12 +201,24 @@ public class ArchonRobot extends BaseRobot {
 
     public void tryToBuild() throws GameActionException {
         //try to build a robot
+        Direction dl = randomDirection();
+        if (rc.getRoundNum() % 400 < 20 && rc.canBuild(dl, RobotType.SCOUT) && rc.isCoreReady()) {
+            rc.build(dl, RobotType.SCOUT);
+        }
         double prob = random.nextDouble();
         int index = 0;
-        while (prob > probabilities[index]) {
-            index++;
+        RobotType robot;
+        if (Utility.getClosestRound(zss) < 30) {
+            while (prob > probabilitiesZ[index]) {
+                index++;
+            }
+            robot = buildRobotTypes[index];
+        } else {
+            while (prob > probabilities[index]) {
+                index++;
+            }
+            robot = buildRobotTypes[index];
         }
-        RobotType robot = buildRobotTypes[index];
         for (Direction d : Direction.values()) {
             if (rc.canBuild(d, robot)) {
                 if (rc.isCoreReady()) {
@@ -216,6 +232,7 @@ public class ArchonRobot extends BaseRobot {
                 }
             }
         }
+        return;
     }
 
     protected void postrun() throws GameActionException {

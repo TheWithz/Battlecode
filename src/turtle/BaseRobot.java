@@ -1,4 +1,4 @@
-package team184;
+package turtle;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,8 +17,6 @@ import battlecode.common.RobotInfo;
 import battlecode.common.RobotType;
 import battlecode.common.Signal;
 import battlecode.common.Team;
-import team184.MessageSignal;
-
 /*Base Robot class for implementing the types of robots
  * Begins with the startLoop method, which should not exit 
  * 
@@ -51,7 +49,6 @@ public abstract class BaseRobot {
 		for(RobotInfo ri : nearbyRobots){
 			if(ri.type == RobotType.ARCHON){
 				nearestArchonLocation = ri.location;
-				System.out.println("Hello Matey");
 			}
 		}
 	}
@@ -87,7 +84,7 @@ public abstract class BaseRobot {
 					if(nearestArchonLocation == null || s.getLocation().distanceSquaredTo(rc.getLocation()) < nearestArchonLocation.distanceSquaredTo(rc.getLocation())){
 						nearestArchonLocation = s.getLocation();
 					}
-
+					
 				}
 			}
 		}
@@ -97,9 +94,9 @@ public abstract class BaseRobot {
 	/**
 	 * Looks for attackable robot and attacks
 	 * If it cannot attack, it finds the best path and moves
-	 *
+	 * 
 	 * Otherwise, it randomly moves if no robots are in range
-	 *
+	 * 
 	 * @throws GameActionException
 	 */
 	protected void defaultBehavior() throws GameActionException {
@@ -140,7 +137,7 @@ public abstract class BaseRobot {
 						goalLocation = null;
 						currentCommandType = null;
 					}
-
+					
 				}
 				else{
 					int[] bestDirection = new int[8];
@@ -164,7 +161,7 @@ public abstract class BaseRobot {
 
 	/**
 	 * Retreats in the direction with the biggest distance from enemies
-	 *
+	 * 	
 	 * @param nearbyEnemies Array of nearby robots
 	 * @return whether the robot retreated
 	 * @throws GameActionException
@@ -202,7 +199,7 @@ public abstract class BaseRobot {
 
 	private ArrayList<MapLocation> previousMoves = new ArrayList<MapLocation>();
 	public int tryToMove(Direction forward) throws GameActionException{
-		if(previousMoves.size() > 2){
+		if(previousMoves.size() > 5){
 			previousMoves.remove(0);
 		}
 		if(rc.isCoreReady()){
