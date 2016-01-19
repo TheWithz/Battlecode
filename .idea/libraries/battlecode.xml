@@ -1,7 +1,7 @@
 <component name="libraryTable">
   <library name="battlecode">
     <CLASSES>
-      <root url="jar://$PROJECT_DIR$/../../jarFiles/battlecode.jar!/" />
+      <root url="jar://D:/JarFiles/battlecode.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
