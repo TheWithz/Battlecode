@@ -1,12 +1,13 @@
-package team184;
+package turtle;
 
 import battlecode.common.*;
 
-public class Combat extends BaseRobot {
+public class Combat extends BaseRobot{
 
-    public Combat(RobotController rc) {
-        super(rc);
-    }
+	public Combat(RobotController rc) {
+		super(rc);
+		// TODO Auto-generated constructor stub
+	}
 
 
 	public boolean isEnemyStronger(){

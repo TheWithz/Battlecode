@@ -1,4 +1,4 @@
-package team184;
+package turtle;
 
 import java.util.ArrayList;
 
@@ -6,11 +6,11 @@ import battlecode.common.*;
 
 public class ArchonRobot extends BaseRobot{
 	private RobotType[] buildRobotTypes = {
-			RobotType.SCOUT,
+			RobotType.SCOUT, 
 			RobotType.SOLDIER,
-			RobotType.GUARD,
+			RobotType.GUARD, 
 	};
-	private double[] probabilities = {0.0, 0.35, 1.0};
+	private double[] probabilities = {0.1, 0.65, 1.0};
 	private double[] probabilitiesZ = {0.0, 0.4, 1.0};
 
 	int heiarchy = -1;
@@ -45,29 +45,29 @@ public class ArchonRobot extends BaseRobot{
 					}
 					MessageSignal msgSig= new MessageSignal(signal);
 					switch(msgSig.getMessageType()){
-						case ROBOT:
-							if(msgSig.getPingedTeam() == Team.NEUTRAL){
-								rc.setIndicatorString(0,  "Found neutral");
-								if(msgSig.getPingedLocation().distanceSquaredTo(rc.getLocation()) < 40){
-									goalLocation = msgSig.getPingedLocation();
-								}
+					case ROBOT:
+						if(msgSig.getPingedTeam() == Team.NEUTRAL){
+							rc.setIndicatorString(0,  "Found neutral");
+							if(msgSig.getPingedLocation().distanceSquaredTo(rc.getLocation()) < 40){
+								goalLocation = msgSig.getPingedLocation();
 							}
-							if(msgSig.getPingedType() == RobotType.ARCHON && msgSig.getPingedTeam() == myTeam.opponent()){
-								rc.setIndicatorString(0, "Found enemy Archon");
-								foundEnemyArchon = true;
-								sentGoal = false;
-								enemyArchon = msgSig.getPingedLocation();
-							}
-							if(msgSig.getPingedType() == RobotType.ZOMBIEDEN){
-								rc.setIndicatorString(2, "Found Zombie Den");
-								knownZombieDenLocations.add(msgSig.getPingedLocation());
-								foundZombieDen = true;
-							}
-							break;
-						case PARTS:
-							break;
-						default:
-							break;
+						}
+						if(msgSig.getPingedType() == RobotType.ARCHON && msgSig.getPingedTeam() == myTeam.opponent()){
+							rc.setIndicatorString(0, "Found enemy Archon");
+							foundEnemyArchon = true;
+							sentGoal = false;
+							enemyArchon = msgSig.getPingedLocation();
+						}
+						if(msgSig.getPingedType() == RobotType.ZOMBIEDEN){
+							rc.setIndicatorString(2, "Found Zombie Den");
+							knownZombieDenLocations.add(msgSig.getPingedLocation());
+							foundZombieDen = true;
+						}
+						break;
+					case PARTS:
+						break;
+					default:
+						break;
 					}
 				}
 			}
@@ -138,8 +138,8 @@ public class ArchonRobot extends BaseRobot{
 				goalDirection.setCommand(goal, MessageSignal.CommandType.MOVE);
 			}
 
-			goalDirection.send(GameConstants.MAP_MAX_HEIGHT*GameConstants.MAP_MAX_HEIGHT);
-			sentGoal = true;
+			goalDirection.send(30*30);
+			sentGoal = true;			
 			lastSentGoal = rc.getRoundNum();
 			rc.setIndicatorString(2, goal+"");
 		}
@@ -159,7 +159,7 @@ public class ArchonRobot extends BaseRobot{
 				rc.repair(friendWithLowestHP.location);
 			}
 		}
-		if(goalLocation != null){
+		if(goalLocation != null && rc.getRoundNum() < 150){
 
 			if(rc.canSense(goalLocation)){
 				goalLocation = null;
@@ -167,13 +167,13 @@ public class ArchonRobot extends BaseRobot{
 			if(Utility.getClosestRound(zss) - rc.getRoundNum() > 50 && rc.getTeamParts() > 200){
 				tryToBuild();
 			}
-			else if(rc.isCoreReady() && goalLocation != null){
+			else if(rc.isCoreReady()){
 				BugNav.goTo(goalLocation);
 			}
 		}
 
 		//try to activate neutral units
-		MapLocation closestNeutral = Utility.closestLocation(neutralBotLocations, rc.getLocation());
+		/*MapLocation closestNeutral = Utility.closestLocation(neutralBotLocations, rc.getLocation());
 		if (closestNeutral != null) {
 			rc.setIndicatorString(2, "Finding Neutal");
 			if(rc.canSense(closestNeutral) && (rc.senseRobotAtLocation(closestNeutral) == null || rc.senseRobotAtLocation(closestNeutral).team != Team.NEUTRAL)){
@@ -187,55 +187,40 @@ public class ArchonRobot extends BaseRobot{
 			} else if (rc.isCoreReady() && rc.canMove(rc.getLocation().directionTo(closestNeutral))) {
 				tryToMove(rc.getLocation().directionTo(closestNeutral));
 			}
-		}
+		}*/
 
 		RobotInfo[] enemies = rc.senseHostileRobots(rc.getLocation(), RobotType.ARCHON.sensorRadiusSquared);
 		if(enemies.length > 3){
-			tryToRetreat(enemies);
+			//tryToRetreat(enemies);
 		}
 
 		tryToBuild();
 		if(enemies.length > 0){
-			tryToRetreat(enemies);
+			//tryToRetreat(enemies);
 			suppressSignals = true;
 			return;
 		}else{
-			defaultBehavior();
+			//defaultBehavior();
 		}
 		suppressSignals = false;
 	}
 
 	public void tryToBuild() throws GameActionException{
 		//try to build a robot
-		Direction dl = randomDirection();
-		if(rc.getRoundNum() % 400 < 20 && rc.canBuild(dl, RobotType.SCOUT) && rc.isCoreReady()){
-			rc.build(dl, RobotType.SCOUT);
-		}
 		double prob = random.nextDouble();
 		int index = 0;
 		RobotType robot;
-		if(Utility.getClosestRound(zss) < 30){
-			while(prob > probabilitiesZ[index]){
-				index++;
+		if(rc.getRoundNum() < 50){
+			for(Direction d : Direction.values()){
+				if(rc.canBuild(d, RobotType.SOLDIER) && rc.isCoreReady()){
+					rc.build(d, RobotType.SOLDIER);
+				}
 			}
-			robot = buildRobotTypes[index];
 		}
 		else{
-			while(prob > probabilities[index]){
-				index++;
-			}
-			robot = buildRobotTypes[index];
-		}
-		for(Direction d : Direction.values()){
-			if (rc.canBuild(d, robot)) {
-				if (rc.isCoreReady()) {
-					rc.build(d, robot);
-					int newid = rc.senseRobotAtLocation(rc.getLocation().add(d)).ID;
-					MessageSignal teamFirstDirective = new MessageSignal(rc);
-					if(leaderLocation != null){
-						teamFirstDirective.setCommand(leaderLocation, MessageSignal.CommandType.MOVE);
-					}
-					teamFirstDirective.send(2);
+			for(Direction d : Direction.values()){
+				if(rc.canBuild(d, RobotType.TURRET) && rc.isCoreReady()){
+					rc.build(d, RobotType.TURRET);
 				}
 			}
 		}

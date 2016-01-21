@@ -1,32 +1,35 @@
 package team184;
 
-import battlecode.common.*;
-
 import java.util.ArrayList;
+
+import battlecode.common.*;
+import team184.BaseRobot;
 
 public class Utility {
 
-    public static RobotInfo[] combine(RobotInfo[] o1, RobotInfo[] o2) {
+
+    public static RobotInfo[] combine(RobotInfo[] o1, RobotInfo[] o2){
         RobotInfo[] ret = new RobotInfo[o1.length + o2.length];
         int index = 0;
-        for (RobotInfo o : o1) {
+        for(RobotInfo o : o1){
             ret[index] = o;
             index++;
         }
-        for (RobotInfo o : o2) {
+        for(RobotInfo o : o2){
             ret[index] = o;
             index++;
         }
         return ret;
     }
 
+
     //Returns whether the Direction is one of the three Directions in the relatively opposite Direction
-    public static boolean oppositeish(Direction d1, Direction d2) {
+    public static boolean oppositeish(Direction d1, Direction d2){
         Direction dTest = d1.opposite();
         return d2 == dTest || d2 == dTest.rotateRight() || d2 == dTest.rotateLeft();
     }
 
-    public static boolean isBlocked(RobotController rc, MapLocation loc) throws GameActionException {
+    public static boolean isBlocked(RobotController rc, MapLocation loc) throws GameActionException{
         return !rc.onTheMap(loc) || rc.senseRubble(loc) >= 100 || rc.senseRobotAtLocation(loc) != null;
     }
 
@@ -34,8 +37,8 @@ public class Utility {
     public static RobotInfo getRobotWithLowestHP(RobotInfo[] nearbyRobots) {
         RobotInfo lowestRobot = null;
         double lowest = 99999.0;
-        for (RobotInfo ri : nearbyRobots) {
-            if (ri.health < lowest) {
+        for(RobotInfo ri : nearbyRobots){
+            if(ri.health < lowest){
                 lowest = ri.health;
                 lowestRobot = ri;
             }
@@ -43,11 +46,11 @@ public class Utility {
         return lowestRobot;
     }
 
-    public static MapLocation closestLocation(ArrayList<MapLocation> locations, MapLocation location) {
+    public static MapLocation closestLocation(ArrayList<MapLocation> locations, MapLocation location){
         int minDistance = 100000;
         MapLocation lowest = null;
-        for (MapLocation loc : locations) {
-            if (loc.distanceSquaredTo(location) < minDistance) {
+        for(MapLocation loc : locations){
+            if(loc.distanceSquaredTo(location) < minDistance){
                 minDistance = loc.distanceSquaredTo(location);
                 lowest = loc;
             }
@@ -55,38 +58,24 @@ public class Utility {
         return lowest;
     }
 
+    public static int getClosestRound(ZombieSpawnSchedule zss){
+        for(int i : zss.getRounds()){
+            if(i > BaseRobot.rc.getRoundNum()){
+                return i;
+            }
+        }
+        return 3000;
+    }
+
     public static RobotInfo closest(RobotInfo[] robots, MapLocation location) {
         int minDistance = 100000;
         RobotInfo lowest = null;
-        for (RobotInfo ri : robots) {
-            if (ri.location.distanceSquaredTo(location) < minDistance) {
+        for(RobotInfo ri : robots){
+            if(ri.location.distanceSquaredTo(location) < minDistance){
                 minDistance = ri.location.distanceSquaredTo(location);
                 lowest = ri;
             }
         }
         return lowest;
     }
-
-    public static void fillRobotTypes(ArrayList<RobotType> list) {
-        list = new ArrayList<>();
-        list.add(RobotType.GUARD);
-        list.add(RobotType.GUARD);
-        list.add(RobotType.GUARD);
-        list.add(RobotType.GUARD);
-        list.add(RobotType.GUARD);
-        list.add(RobotType.GUARD);
-        list.add(RobotType.SCOUT);
-        list.add(RobotType.SCOUT);
-        list.add(RobotType.SOLDIER);
-        list.add(RobotType.SOLDIER);
-        list.add(RobotType.SOLDIER);
-        list.add(RobotType.SOLDIER);
-        list.add(RobotType.SOLDIER);
-        list.add(RobotType.SOLDIER);
-        list.add(RobotType.VIPER);
-        list.add(RobotType.VIPER);
-        list.add(RobotType.TURRET);
-        list.add(RobotType.TURRET);
-    }
-
 }
