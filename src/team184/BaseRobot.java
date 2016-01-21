@@ -78,7 +78,7 @@ public abstract class BaseRobot {
 					if(nearestArchonLocation == null || s.getLocation().distanceSquaredTo(rc.getLocation()) < nearestArchonLocation.distanceSquaredTo(rc.getLocation())){
 						nearestArchonLocation = s.getLocation();
 					}
-					
+
 				}
 			}
 		}
@@ -88,9 +88,9 @@ public abstract class BaseRobot {
 	/**
 	 * Looks for attackable robot and attacks
 	 * If it cannot attack, it finds the best path and moves
-	 * 
+	 *
 	 * Otherwise, it randomly moves if no robots are in range
-	 * 
+	 *
 	 * @throws GameActionException
 	 */
 	protected void defaultBehavior() throws GameActionException {
@@ -134,7 +134,7 @@ public abstract class BaseRobot {
 
 	/**
 	 * Retreats in the direction with the biggest distance from enemies
-	 * 	
+	 *
 	 * @param nearbyEnemies Array of nearby robots
 	 * @return whether the robot retreated
 	 * @throws GameActionException
